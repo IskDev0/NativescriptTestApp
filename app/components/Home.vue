@@ -5,18 +5,28 @@
     </ActionBar>
     <ScrollView>
       <FlexboxLayout class="max-w-none mx-auto px-4" flexDirection="column">
-        <Button class="rounded-full bg-blue-700 font-bold my-4" @tap="fetchUsers">Load</Button>
-        <ActivityIndicator v-if="isBusy == true" :busy="isBusy"/>
-        <FlexboxLayout class="flex flex-col my-2" v-for="user in users" :key="user.id">
-          <StackLayout class="flex flex-col p-2 border-2 border-white text-lg">
-            <Label><Span class="text-blue-500">Name: </Span> <Span>{{ user.name }}</Span></Label>
-            <Label><Span class="text-blue-500">Username: </Span> <Span>{{ user.username }}</Span></Label>
-            <Label><Span class="text-blue-500">Email: </Span> <Span>{{ user.email }}</Span></Label>
-            <Label><Span class="text-blue-500">City: </Span> <Span>{{ user.address.city }}</Span></Label>
-            <Label><Span class="text-blue-500">Street: </Span> <Span>{{ user.address.street }}</Span></Label>
-            <Label><Span class="text-blue-500">Phone: </Span> <Span>{{ user.phone }}</Span></Label>
-          </StackLayout>
+        <FlexboxLayout flexDirection="column">
+          <SearchBar
+              class="w-full rounded-full"
+              textFieldHintColor="#fff"
+              color="#fff"
+              textProperty="#fff"
+              v-model="search"
+              hint="Search..."
+              @submit="fetchData"/>
+          <ActivityIndicator v-if="isBusy" :busy="isBusy"/>
         </FlexboxLayout>
+        <StackLayout
+            class="text-white px-4 py-4"
+            v-for="film in this.films"
+            :key="film.imdbID">
+          <Image class="rounded-t-lg object-cover h-max w-full" :src="film.Poster"/>
+          <StackLayout class="bg-blue-400 text-white p-2">
+            <Label class="text-xl">{{ film.Title }}</Label>
+            <Label class="text-lg">{{ film.Year }}</Label>
+            <Label>{{ film.Type }}</Label>
+          </StackLayout>
+        </StackLayout>
       </FlexboxLayout>
     </ScrollView>
   </Page>
@@ -26,30 +36,37 @@
 export default {
   data() {
     return {
-      users: [],
+      api_key: '6f60f9ad',
+      films: [],
+      search: "",
       isBusy: false
     }
   },
   methods: {
-    async fetchUsers() {
+    async fetchData() {
       try {
         this.isBusy = true
-        let response = await fetch("https://jsonplaceholder.typicode.com/users")
+        let response = await fetch(`https://www.omdbapi.com/?apikey=${this.api_key}&s=${this.search}`)
         let result = await response.json()
-        this.users = result
-      } catch (error) {
-        console.log("Error")
+        this.films = result.Search
+        this.search = ""
+      } catch (err) {
+        console.log("error")
       } finally {
         this.isBusy = false
       }
+      if (this.films == null) {
+        this.error()
+      }
+
     },
-  }
+    error() {
+      alert({
+        title: "Error",
+        message: "This film does not exist",
+        okButtonText: "OK"
+      })
+    }
+  },
 }
 </script>
-
-<style scoped lang="scss">
-
-.textField {
-  font-size: 20px;
-}
-</style>
