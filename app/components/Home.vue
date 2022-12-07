@@ -16,11 +16,10 @@
               @submit="fetchData"/>
           <ActivityIndicator v-if="isBusy" :busy="isBusy"/>
         </FlexboxLayout>
-        <ListView for="film in this.films" @itemTap="onItemTap" style="height:20000px">
+        <ListView for="film in films" @itemTap="onItemTap" style="height:20000px">
           <v-template>
             <FlexboxLayout class="py-4" flexDirection="column">
               <Image class="rounded-t-lg object-cover h-max w-full" :src="film.Poster"/>
-              -->
               <StackLayout class="bg-blue-400 text-white p-2">
                 <Label class="text-xl">{{ film.Title }}</Label>
                 <Label class="text-lg">{{ film.Year }}</Label>
@@ -33,6 +32,7 @@
     </ScrollView>
   </Page>
 </template>
+
 
 <script>
 export default {
@@ -70,15 +70,12 @@ export default {
       })
     },
     onItemTap: function (args) {
+      const detailsProps = {
+        filmTitle: args.item.Title,
+      }
       this.$navigateTo(details, {
-        context: {
-          propsData: {
-            imageSrc: args.item.Poster,
-            filmTitle: args.item.Title
-          }
-        }
+        props: detailsProps
       })
-      console.log(args.item.Title + ' tapped');
 
     },
   },
@@ -86,31 +83,59 @@ export default {
 
 
 const details = {
+  data() {
+    return {
+      api_key: '6f60f9ad',
+      film_details: [],
+      isBusy: false
+    }
+  },
+  mounted() {
+    this.fetchDetails()
+  },
   props: {
-    imageSrc: {
-      type: String,
-      required: true
-    },
     filmTitle: {
       type: String,
       required: true
-    }
+    },
   },
   methods: {
     goBack() {
       this.$navigateBack()
     },
+    async fetchDetails() {
+      try {
+        this.isBusy = true
+        let filmResponse = await fetch(`https://www.omdbapi.com/?apikey=${this.api_key}&t=${this.filmTitle}`)
+        let filmResult = await filmResponse.json()
+        this.film_details = filmResult
+      } catch (err) {
+        console.log("error")
+      } finally {
+        this.isBusy = false
+      }
+    }
   },
 
   template: `
     <Page class="bg-slate-800 text-white">
     <ActionBar class="bg-slate-800">
-      <Label text="Details"/>
+      <Label class="text-xl" :text="this.filmTitle"/>
     </ActionBar>
     <ScrollView>
-      <FlexboxLayout flexDirection="column">
-        <Image :src="this.imageSrc"/>
-        <Label :text="this.imageSrc"></Label>
+      <FlexboxLayout class="px-4 my-4" flexDirection="column">
+        <FlexboxLayout class="py-4" flexDirection="column">
+        <ActivityIndicator v-if="this.isBusy" :busy="isBusy"/>
+        <Label :text="this.film_details.Year"/>
+        <Label :text="this.film_details.Rated"/>
+        <Label :text="this.film_details.Released"/>
+        <Label :text="this.film_details.Runtime"/>
+        <Label :text="this.film_details.Plot"/>
+        <Label>Director: {{this.film_details.Director}}</Label>
+        <Label>Country: {{this.film_details.Country}}</Label>
+        <Label class="text-lg underline" :text="this.film_details.Genre"/>
+        <Image class="my-4" :src="this.film_details.Poster"/>
+        </FlexboxLayout>
         <Button class="py-4 bg-indigo-700 text-white rounded-full" @tap="goBack">Back</Button>
       </FlexboxLayout>
     </ScrollView>
