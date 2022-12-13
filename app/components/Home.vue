@@ -87,7 +87,7 @@ const details = {
     return {
       api_key: '6f60f9ad',
       film_details: [],
-      isBusy: false
+      isBusy: false,
     }
   },
   mounted() {
@@ -98,6 +98,9 @@ const details = {
       type: String,
       required: true
     },
+  },
+  computed: {
+
   },
   methods: {
     goBack() {
@@ -120,21 +123,23 @@ const details = {
   template: `
     <Page class="bg-slate-800 text-white">
     <ActionBar class="bg-slate-800">
-      <Label class="text-xl" :text="this.filmTitle"/>
+      <Label>Details</Label>
+      <NavigationButton text="Go back" android.systemIcon="ic_menu_back" @tap="goBack" />
     </ActionBar>
     <ScrollView>
       <FlexboxLayout class="px-4 my-4" flexDirection="column">
         <FlexboxLayout class="py-4" flexDirection="column">
         <ActivityIndicator v-if="this.isBusy" :busy="isBusy"/>
-        <Label :text="this.film_details.Year"/>
-        <Label :text="this.film_details.Rated"/>
-        <Label :text="this.film_details.Released"/>
-        <Label :text="this.film_details.Runtime"/>
-        <Label :text="this.film_details.Plot"/>
-        <Label>Director: {{this.film_details.Director}}</Label>
-        <Label>Country: {{this.film_details.Country}}</Label>
-        <Label class="text-lg underline" :text="this.film_details.Genre"/>
-        <Image class="my-4" :src="this.film_details.Poster"/>
+          <Image class="my-4" :src="this.film_details.Poster"/>
+          <Label textWrap="true" class="text-xl" :text="this.filmTitle"/>
+          <Label :text="this.film_details.Year"/>
+          <Label :text="this.film_details.Rated"/>
+          <Label :text="this.film_details.Released"/>
+          <Label :text="this.film_details.Runtime"/>
+          <Label textWrap="true" :text="this.film_details.Plot"/>
+          <Label>Director: {{this.film_details.Director}}</Label>
+          <Label>Country: {{this.film_details.Country}}</Label>
+          <Label class="text-lg underline" :text="this.film_details.Genre"/>
         </FlexboxLayout>
         <Button class="py-4 bg-indigo-700 text-white rounded-full" @tap="goBack">Back</Button>
       </FlexboxLayout>
